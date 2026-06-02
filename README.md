@@ -32,7 +32,7 @@ npm run dev
 The server defaults to:
 
 ```text
-http://127.0.0.1:3000/mcp
+http://127.0.0.1:7573/mcp
 ```
 
 Use the diagnostic client from another terminal:
@@ -50,7 +50,7 @@ Environment variables:
 
 - `PENDRAGON_TOKEN` - required bearer token.
 - `PENDRAGON_HOST` - bind host, default `127.0.0.1`.
-- `PENDRAGON_PORT` - bind port, default `3000`.
+- `PENDRAGON_PORT` - bind port, default `7573`.
 - `PENDRAGON_ENDPOINT_PATH` - MCP endpoint, default `/mcp`.
 - `PENDRAGON_ALLOWED_ORIGINS` - comma-separated allowed `Origin` values.
 - `PENDRAGON_SHELL_PATH` - explicit shell path.

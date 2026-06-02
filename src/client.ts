@@ -1,7 +1,7 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 
-const DEFAULT_URL = "http://127.0.0.1:3000/mcp";
+const DEFAULT_URL = "http://127.0.0.1:7573/mcp";
 
 async function main(): Promise<void> {
   const [command, toolName, ...argParts] = process.argv.slice(2);

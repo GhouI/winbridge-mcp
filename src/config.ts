@@ -12,7 +12,7 @@ export type AppConfig = {
   maxOutputBytes: number;
 };
 
-const DEFAULT_PORT = 3000;
+const DEFAULT_PORT = 7573;
 const DEFAULT_TIMEOUT_MS = 30000;
 const DEFAULT_MAX_OUTPUT_BYTES = 1024 * 1024;
 
