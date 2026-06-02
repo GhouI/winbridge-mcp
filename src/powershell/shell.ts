@@ -35,6 +35,7 @@ export async function executePowerShell(
     {
       cwd: options.cwd ?? runtime.defaultCwd,
       env: { ...process.env, ...options.env },
+      shell: shouldUseCommandShell(shellPath),
       windowsHide: true
     }
   );
@@ -78,4 +79,8 @@ export async function executePowerShell(
       });
     });
   });
+}
+
+function shouldUseCommandShell(shellPath: string): boolean {
+  return process.platform === "win32" && shellPath.toLowerCase().endsWith(".cmd");
 }

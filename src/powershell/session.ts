@@ -38,10 +38,19 @@ class PowerShellSession {
     const shellPath = resolveShellPath(runtime.shellPath);
     this.child = spawn(
       shellPath,
-      ["-NoLogo", "-NoProfile", "-NoExit", "-ExecutionPolicy", "Bypass", "-Command", "-"],
+      [
+        "-NoLogo",
+        "-NoProfile",
+        "-NonInteractive",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-Command",
+        createBootstrapCommand()
+      ],
       {
         cwd,
         env: { ...process.env, ...env },
+        shell: process.platform === "win32" && shellPath.toLowerCase().endsWith(".cmd"),
         windowsHide: true
       }
     );
@@ -104,7 +113,7 @@ class PowerShellSession {
     };
 
     this.pending = pending;
-    this.child.stdin.write(formatSessionCommand(options.command, marker));
+    this.child.stdin.write(`${Buffer.from(formatSessionCommand(options.command, marker), "utf8").toString("base64")}\n`);
   }
 
   private handleStdout(chunk: Buffer): void {
@@ -221,6 +230,19 @@ ${command}
 }
 [Console]::Out.WriteLine("${marker}:exit=$__pendragon_exit_code")
 `;
+}
+
+function createBootstrapCommand(): string {
+  return [
+    "while (($line = [Console]::In.ReadLine()) -ne $null) {",
+    "try {",
+    "$payload = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($line));",
+    "Invoke-Expression $payload",
+    "} catch {",
+    "Write-Error $_",
+    "}",
+    "}"
+  ].join(" ");
 }
 
 function removePowerShellPrompts(text: string): string {
