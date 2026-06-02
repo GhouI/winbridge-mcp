@@ -27,6 +27,8 @@
     "build": "tsc -p tsconfig.json",
     "dev": "tsx src/server.ts",
     "client": "tsx src/client.ts",
+    "video:render": "remotion render video/index.ts PendragonDemo assets/pendragon-demo.mp4",
+    "video:still": "remotion still video/index.ts PendragonDemo assets/pendragon-demo.png --frame=80",
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc -p tsconfig.json --noEmit"
@@ -34,11 +36,17 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.18.2",
     "express": "^5.1.0",
-    "zod": "^3.25.76"
+    "zod": "4.3.6"
   },
   "devDependencies": {
+    "@remotion/cli": "^4.0.471",
     "@types/express": "^5.0.3",
     "@types/node": "^24.0.0",
+    "@types/react": "^19.2.16",
+    "@types/react-dom": "^19.2.3",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "remotion": "^4.0.471",
     "tsx": "^4.20.5",
     "typescript": "^5.9.2",
     "vitest": "^4.1.8"

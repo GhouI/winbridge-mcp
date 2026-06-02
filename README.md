@@ -5,12 +5,24 @@
 [![MCP](https://img.shields.io/badge/MCP-Streamable%20HTTP-blue)](https://modelcontextprotocol.io)
 [![Windows](https://img.shields.io/badge/Windows-PowerShell-5391FE)](https://learn.microsoft.com/powershell/)
 
-**Give AI agents headless PowerShell access to Windows hosts through MCP.**
+**AI agents can write code, run terminals, and use tools. Windows RDP still traps them behind a GUI. Pendragon turns a Windows host into an MCP-native PowerShell target.**
 
 Pendragon is a TypeScript [Model Context Protocol](https://modelcontextprotocol.io) server that runs on a Windows machine and exposes PowerShell tools over Streamable HTTP. It lets Codex, Claude Code, and other MCP-capable agents operate a Windows host without RDP screenshots, mouse control, or a human-owned terminal window.
 
 ```text
 Agent or MCP client  ->  Pendragon MCP over HTTP  ->  Windows PowerShell
+```
+
+## Demo
+
+[![Pendragon demo poster](assets/pendragon-demo.png)](assets/pendragon-demo.mp4)
+
+Watch the generated demo video: [assets/pendragon-demo.mp4](assets/pendragon-demo.mp4)
+
+The demo is rendered with [Remotion](https://www.remotion.dev/) from the source in [video/](video/). Re-render it locally with:
+
+```powershell
+npm run video:render
 ```
 
 ## Why Pendragon?
