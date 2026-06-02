@@ -1,9 +1,28 @@
 {
   "name": "pendragon-mcp",
   "version": "0.1.0",
-  "private": true,
   "type": "module",
-  "description": "Pendragon MCP bridge for headless PowerShell execution on Windows hosts.",
+  "description": "Remote MCP bridge that gives AI agents secure headless PowerShell access to Windows hosts.",
+  "license": "MIT",
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "powershell",
+    "windows",
+    "windows-server",
+    "ai-agents",
+    "codex",
+    "claude-code",
+    "remote-execution"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GhouI/pendragon-mcp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/GhouI/pendragon-mcp/issues"
+  },
+  "homepage": "https://github.com/GhouI/pendragon-mcp#readme",
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "dev": "tsx src/server.ts",

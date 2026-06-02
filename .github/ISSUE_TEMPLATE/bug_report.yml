@@ -1,0 +1,43 @@
+name: Bug report
+description: Report a reproducible problem with Pendragon MCP.
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a bug. Do not include real tokens, passwords, IP allowlists, or RDP credentials.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What happened?
+      description: Describe the behavior and what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Reproduction steps
+      description: List exact steps or commands.
+      placeholder: |
+        1. Start server with ...
+        2. Connect client with ...
+        3. Call tool ...
+    validations:
+      required: true
+  - type: input
+    id: windows
+    attributes:
+      label: Windows version
+      placeholder: Windows Server 2022, Windows Server 2025, Windows 11, etc.
+  - type: input
+    id: node
+    attributes:
+      label: Node.js version
+      placeholder: node --version
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs
+      description: Paste sanitized logs only.
+      render: text

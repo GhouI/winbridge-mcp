@@ -1,29 +1,66 @@
 # Pendragon MCP
 
-Pendragon is a TypeScript MCP bridge for headless PowerShell execution on Windows hosts.
-It runs as a standalone Streamable HTTP MCP server, so no IIS or RDP GUI automation is required.
+[![CI](https://github.com/GhouI/pendragon-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/GhouI/pendragon-mcp/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![MCP](https://img.shields.io/badge/MCP-Streamable%20HTTP-blue)](https://modelcontextprotocol.io)
+[![Windows](https://img.shields.io/badge/Windows-PowerShell-5391FE)](https://learn.microsoft.com/powershell/)
 
-## What It Does
+**Give AI agents headless PowerShell access to Windows hosts through MCP.**
 
-Pendragon exposes these MCP tools:
+Pendragon is a TypeScript [Model Context Protocol](https://modelcontextprotocol.io) server that runs on a Windows machine and exposes PowerShell tools over Streamable HTTP. It lets Codex, Claude Code, and other MCP-capable agents operate a Windows host without RDP screenshots, mouse control, or a human-owned terminal window.
 
-- `powershell_execute` - run a one-shot PowerShell command.
-- `powershell_open_session` - open a persistent PowerShell session.
-- `powershell_send` - send a command to an existing session.
-- `powershell_close_session` - close a session.
-- `powershell_list_sessions` - list active sessions.
+```text
+Agent or MCP client  ->  Pendragon MCP over HTTP  ->  Windows PowerShell
+```
 
-Tool results include `stdout`, `stderr`, `exitCode`, `durationMs`, `truncated`, and `commandId` where applicable.
+## Why Pendragon?
 
-## Requirements
+Most coding agents are comfortable in terminals, but Windows RDP is a GUI-first environment. Pendragon gives agents a clean command surface instead:
+
+- Run PowerShell commands on a Windows host from any MCP client.
+- Keep persistent PowerShell sessions when variables, cwd, or imported modules matter.
+- Use bearer-token auth and provider firewalls instead of exposing raw RDP workflows.
+- Test locally with a diagnostic client before connecting a real agent.
+- Avoid IIS: Pendragon is a standalone Node HTTP server.
+
+## Tooling
+
+Pendragon exposes five MCP tools:
+
+| Tool | Purpose |
+| --- | --- |
+| `powershell_execute` | Run one isolated PowerShell command. |
+| `powershell_open_session` | Start a persistent PowerShell session. |
+| `powershell_send` | Send a command to a persistent session. |
+| `powershell_close_session` | Close a persistent session. |
+| `powershell_list_sessions` | List active sessions. |
+
+Command results include:
+
+```json
+{
+  "commandId": "uuid",
+  "stdout": "hello\r\n",
+  "stderr": "",
+  "exitCode": 0,
+  "durationMs": 143,
+  "truncated": false
+}
+```
+
+## Quickstart
+
+Requirements:
 
 - Node.js 24 or newer
 - npm
 - Windows PowerShell (`powershell.exe`) or PowerShell 7 (`pwsh`)
 
-## Local Run
+Run Pendragon locally:
 
 ```powershell
+git clone https://github.com/GhouI/pendragon-mcp.git
+cd pendragon-mcp
 npm install
 $env:PENDRAGON_TOKEN = "dev-token"
 npm run dev
@@ -41,42 +78,103 @@ Use the diagnostic client from another terminal:
 $env:PENDRAGON_TOKEN = "dev-token"
 npm run client -- list-tools
 npm run client -- exec Write-Output hello
-npm run client -- call-tool powershell_execute '{ "command": "Write-Output hello" }'
 ```
 
-For full Windows deployment steps and setup examples for Codex and Claude Code, see [Install Pendragon and Connect Agents](docs/INSTALL_AND_AGENT_USAGE.md).
+## Connect Agents
+
+Full setup guide: [Install Pendragon and Connect Agents](docs/INSTALL_AND_AGENT_USAGE.md)
+
+Codex `~/.codex/config.toml`:
+
+```toml
+[mcp_servers.pendragon]
+url = "http://WINDOWS_SERVER_IP:7573/mcp"
+bearer_token_env_var = "PENDRAGON_TOKEN"
+tool_timeout_sec = 120
+default_tools_approval_mode = "prompt"
+enabled = true
+```
+
+Claude Code:
+
+```powershell
+claude mcp add --transport http pendragon http://WINDOWS_SERVER_IP:7573/mcp `
+  --header "Authorization: Bearer YOUR_TOKEN"
+```
+
+Also see:
+
+- [Codex config example](examples/codex-config.toml)
+- [Claude Code MCP JSON example](examples/claude.mcp.json)
+
+## Remote Windows Deployment
+
+On the Windows host:
+
+```powershell
+git clone https://github.com/GhouI/pendragon-mcp.git
+cd pendragon-mcp
+npm install
+$env:PENDRAGON_TOKEN = "replace-with-a-long-random-token"
+$env:PENDRAGON_HOST = "0.0.0.0"
+$env:PENDRAGON_PORT = "7573"
+npm run dev
+```
+
+Open the Windows firewall for the MCP port:
+
+```powershell
+New-NetFirewallRule `
+  -DisplayName "Pendragon MCP 7573" `
+  -Direction Inbound `
+  -Protocol TCP `
+  -LocalPort 7573 `
+  -Action Allow
+```
+
+Restrict your cloud firewall so TCP `7573` is reachable only from trusted IP addresses.
 
 ## Configuration
 
-Environment variables:
-
-- `PENDRAGON_TOKEN` - required bearer token.
-- `PENDRAGON_HOST` - bind host, default `127.0.0.1`.
-- `PENDRAGON_PORT` - bind port, default `7573`.
-- `PENDRAGON_ENDPOINT_PATH` - MCP endpoint, default `/mcp`.
-- `PENDRAGON_ALLOWED_ORIGINS` - comma-separated allowed `Origin` values.
-- `PENDRAGON_SHELL_PATH` - explicit shell path.
-- `PENDRAGON_CWD` - default working directory.
-- `PENDRAGON_TIMEOUT_MS` - default command timeout.
-- `PENDRAGON_MAX_OUTPUT_BYTES` - max captured bytes per output stream.
-
-## Testing
-
-```powershell
-npm run typecheck
-npm test
-```
-
-The test suite uses local PowerShell when available and includes a mock shell fixture for deterministic command behavior.
+| Variable | Default | Description |
+| --- | --- | --- |
+| `PENDRAGON_TOKEN` | required | Bearer token required for all MCP requests. |
+| `PENDRAGON_HOST` | `127.0.0.1` | Bind host. Use `0.0.0.0` only behind a firewall or tunnel. |
+| `PENDRAGON_PORT` | `7573` | Bind port. |
+| `PENDRAGON_ENDPOINT_PATH` | `/mcp` | MCP endpoint path. |
+| `PENDRAGON_ALLOWED_ORIGINS` | empty | Comma-separated allowed `Origin` values. |
+| `PENDRAGON_SHELL_PATH` | auto | Explicit `pwsh` or `powershell.exe` path. |
+| `PENDRAGON_CWD` | process cwd | Default working directory. |
+| `PENDRAGON_TIMEOUT_MS` | `30000` | Default command timeout. |
+| `PENDRAGON_MAX_OUTPUT_BYTES` | `1048576` | Max captured bytes per output stream. |
 
 ## Security
 
 Pendragon is a remote command-execution server. Treat it as sensitive infrastructure.
 
-- Keep `PENDRAGON_HOST=127.0.0.1` unless you have a private network or tunnel.
-- Use a strong `PENDRAGON_TOKEN`.
-- Do not expose this server directly to the public internet.
-- Commands run as the OS user that launched the server.
-- v1 intentionally allows arbitrary PowerShell after authentication.
+- Use a long random `PENDRAGON_TOKEN`.
+- Keep `PENDRAGON_HOST=127.0.0.1` unless you have a trusted network path.
+- Do not expose Pendragon directly to the public internet.
+- Restrict TCP `7573` at your provider firewall.
+- Run as a dedicated low-privilege Windows user when possible.
+- Rotate tokens after demos, testing sessions, and shared access.
 
-Future hardening should add TLS/mTLS, richer audit logs, per-client authorization, and command policy controls.
+See [SECURITY.md](SECURITY.md) for more detail.
+
+## Roadmap
+
+- HTTPS or reverse-proxy deployment examples
+- Windows service installation
+- richer audit logs
+- optional command policy controls
+- Git Bash support
+- per-client authorization
+- packaged releases
+
+## Contributing
+
+Issues, ideas, and pull requests are welcome. Start with [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## License
+
+MIT. See [LICENSE](LICENSE).
