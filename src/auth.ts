@@ -1,4 +1,15 @@
+import { timingSafeEqual } from "node:crypto";
 import type { Request, RequestHandler, Response } from "express";
+
+/** Constant-time string comparison that does not short-circuit on the first byte. */
+function safeEqual(a: string, b: string): boolean {
+  const bufA = Buffer.from(a, "utf8");
+  const bufB = Buffer.from(b, "utf8");
+  if (bufA.length !== bufB.length) {
+    return false;
+  }
+  return timingSafeEqual(bufA, bufB);
+}
 
 export function extractBearerToken(header: string | undefined): string | undefined {
   if (!header) {
@@ -14,7 +25,11 @@ export function extractBearerToken(header: string | undefined): string | undefin
 }
 
 export function isAuthorized(header: string | undefined, expectedToken: string): boolean {
-  return extractBearerToken(header) === expectedToken;
+  const token = extractBearerToken(header);
+  if (token === undefined) {
+    return false;
+  }
+  return safeEqual(token, expectedToken);
 }
 
 export function createBearerAuthMiddleware(expectedToken: string): RequestHandler {

@@ -160,9 +160,14 @@ export async function startCloudflareTunnel(options: TunnelOptions): Promise<Tun
   });
 
   log(`Starting Cloudflare quick tunnel for ${options.localUrl}...`);
+  // Rewrite the forwarded Host header to loopback. The MCP SDK applies
+  // localhost DNS-rebinding protection by default, which only accepts
+  // localhost/127.0.0.1/[::1] Host headers; without this, tunnel requests
+  // carrying the random *.trycloudflare.com Host would be rejected with 403
+  // before the bearer-token check runs.
   const child = spawn(
     binary,
-    ["tunnel", "--no-autoupdate", "--url", options.localUrl],
+    ["tunnel", "--no-autoupdate", "--http-host-header", "127.0.0.1", "--url", options.localUrl],
     { stdio: ["ignore", "pipe", "pipe"] }
   );
 

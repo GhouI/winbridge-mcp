@@ -135,10 +135,11 @@ npm run dev -- --tunnel
 
 Notes:
 
-- `cloudflared` connects to WinBridge over loopback, so tunnel mode needs **no** `0.0.0.0` bind and **no** inbound firewall rule.
+- `cloudflared` connects to WinBridge over loopback, so tunnel mode needs **no** `0.0.0.0` bind and **no** inbound firewall rule. WinBridge tells `cloudflared` to rewrite the forwarded `Host` header to `127.0.0.1` so the server's built-in DNS-rebinding protection keeps working.
+- Tunnel mode publishes a remote-command server to the public internet, protected **only** by the bearer token. Use a long random `WINBRIDGE_TOKEN` (32+ characters); WinBridge warns at startup if the token looks weak.
 - Quick-tunnel hostnames are random and **change every restart**. Re-paste the printed URL into your agent, or move to a [named Cloudflare tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/) for a stable hostname.
 - The bearer token is still enforced over the tunnel. Treat the public URL as sensitive and rotate the token after demos.
-- Set `WINBRIDGE_TUNNEL_AUTOINSTALL=0` to require a preinstalled `cloudflared`, or `WINBRIDGE_CLOUDFLARED_PATH` to point at a specific binary.
+- Auto-install downloads and runs the official `cloudflared` binary from GitHub releases over HTTPS. If you need a verified/pinned binary, set `WINBRIDGE_TUNNEL_AUTOINSTALL=0` and point `WINBRIDGE_CLOUDFLARED_PATH` at a `cloudflared` you installed and checked yourself.
 
 ## Connect Agents
 

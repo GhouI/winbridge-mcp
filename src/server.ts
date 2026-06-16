@@ -30,6 +30,12 @@ export async function main(): Promise<void> {
 
   let tunnel: TunnelHandle | undefined;
   if (tunnelRequested) {
+    if (config.authToken.length < 24) {
+      console.warn(
+        "Warning: WINBRIDGE_TOKEN is short. Tunnel mode exposes this remote-command server to the public " +
+          "internet (protected only by the bearer token). Use a long random token, e.g. 32+ characters."
+      );
+    }
     try {
       tunnel = await startTunnel(config);
       console.log(`Cloudflare tunnel ready: ${tunnel.publicUrl}`);
