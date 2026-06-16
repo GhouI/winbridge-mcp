@@ -236,11 +236,11 @@ See [SECURITY.md](SECURITY.md) for more detail.
 - Named Cloudflare tunnels for stable hostnames
 - HTTPS or reverse-proxy deployment examples
 - Windows service installation
-- richer audit logs
-- optional command policy controls
+- Richer audit logs
+- Optional command policy controls
 - Git Bash support
-- per-client authorization
-- packaged releases
+- Per-client authorization
+- Packaged releases
 
 ## Contributing
 
